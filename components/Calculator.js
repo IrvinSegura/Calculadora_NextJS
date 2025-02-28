@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FaHistory, FaSyncAlt, FaTrash } from "react-icons/fa";
 
@@ -17,25 +17,25 @@ export default function Calculator() {
       setHistory(JSON.parse(savedHistory));
     }
   }, []);
-  
+
   useEffect(() => {
     localStorage.setItem("calculatorHistory", JSON.stringify(history));
   }, [history]);
 
-  const evaluateExpression = (expr) => {
+  const evaluateExpression = useCallback((expr) => {
     try {
       if (!/^[0-9+\-*/().\s]+$/.test(expr) || /[+\-*/]$/.test(expr.slice(-1))) return null;
-      return new Function(`return ${expr}`)(); 
+      return new Function(`return ${expr}`)();
     } catch {
       return null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (autoCalculate) {
       setResult(evaluateExpression(expression));
     }
-  }, [expression, autoCalculate]);
+  }, [expression, autoCalculate, evaluateExpression]);
 
   const handleButtonClick = (value) => {
     setExpression((prev) => {
@@ -56,7 +56,7 @@ export default function Calculator() {
     });
   };
 
-  const calculateResult = () => {
+  const calculateResult = useCallback(() => {
     const evaluatedResult = evaluateExpression(expression);
     setResult(evaluatedResult);
     if (evaluatedResult !== null) {
@@ -65,7 +65,7 @@ export default function Calculator() {
         ...prev
       ]);
     }
-  };
+  }, [expression, evaluateExpression]);
 
   const formatResult = (num) => {
     if (num === null) return "";
@@ -82,17 +82,17 @@ export default function Calculator() {
     return num.toString();
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress = useCallback((event) => {
     const key = event.key;
     if (/^[0-9+\-*/.]$/.test(key)) {
       setExpression((prev) => {
         if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(key)) {
           return prev.slice(0, -1) + key;
         }
-        
+
         const parts = prev.split(/([+\-*/])/);
         const lastNumber = parts[parts.length - 1];
-        
+
         if (!isNaN(key) || key === ".") {
           if (lastNumber.replace(".", "").length >= 15) {
             return prev;
@@ -111,14 +111,14 @@ export default function Calculator() {
         calculateResult();
       }
     }
-  };
+  }, [autoCalculate, calculateResult]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [autoCalculate, expression]);
+  }, [handleKeyPress]);
 
   const clearHistory = () => {
     setHistory([]);
@@ -138,9 +138,7 @@ export default function Calculator() {
         <button
           data-testid="auto-calculate-button"
           onClick={() => setAutoCalculate(!autoCalculate)}
-          className={`absolute left-[-40px] top-16 p-3 rounded-full shadow-md ${
-            autoCalculate ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`absolute left-[-40px] top-16 p-3 rounded-full shadow-md ${autoCalculate ? "bg-green-500" : "bg-red-500"} text-white`}
         >
           <FaSyncAlt />
         </button>
@@ -149,8 +147,7 @@ export default function Calculator() {
           {expression || "0"}
         </div>
 
-        <div className="w-full text-right font-bold mb-4 p-2 bg-gray-200 rounded-lg overflow-auto break-words text-4xl max-h-20 text-black"
-          style={{ wordWrap: "break-word", minHeight: "3rem" }}>
+        <div className="w-full text-right font-bold mb-4 p-2 bg-gray-200 rounded-lg overflow-auto break-words text-4xl max-h-20 text-black" style={{ wordWrap: "break-word", minHeight: "3rem" }}>
           {result !== null ? formatResult(result) : ""}
         </div>
 
