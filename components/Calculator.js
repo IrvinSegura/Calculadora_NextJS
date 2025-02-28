@@ -42,6 +42,16 @@ export default function Calculator() {
       if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(value)) {
         return prev.slice(0, -1) + value;
       }
+      
+      const parts = prev.split(/([+\-*/])/);
+      const lastNumber = parts[parts.length - 1];
+      
+      if (!isNaN(value) || value === ".") {
+        if (lastNumber.replace(".", "").length >= 15) {
+          return prev;
+        }
+      }
+
       return prev + value;
     });
   };
@@ -64,6 +74,16 @@ export default function Calculator() {
         if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(key)) {
           return prev.slice(0, -1) + key;
         }
+        
+        const parts = prev.split(/([+\-*/])/);
+        const lastNumber = parts[parts.length - 1];
+        
+        if (!isNaN(key) || key === ".") {
+          if (lastNumber.replace(".", "").length >= 15) {
+            return prev;
+          }
+        }
+        
         return prev + key;
       });
     } else if (key === "Backspace") {
