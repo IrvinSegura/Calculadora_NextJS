@@ -11,6 +11,7 @@ export default function Calculator() {
   const [autoCalculate, setAutoCalculate] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
 
+  // Load history from local storage
   useEffect(() => {
     const savedHistory = localStorage.getItem("calculatorHistory");
     if (savedHistory) {
@@ -18,10 +19,12 @@ export default function Calculator() {
     }
   }, []);
 
+  // Save history to local storage
   useEffect(() => {
     localStorage.setItem("calculatorHistory", JSON.stringify(history));
   }, [history]);
 
+  // Evaluate the expression
   const evaluateExpression = useCallback((expr) => {
     try {
       if (!/^[0-9+\-*/().\s]+$/.test(expr) || /[+\-*/]$/.test(expr.slice(-1))) return null;
@@ -31,6 +34,7 @@ export default function Calculator() {
     }
   }, []);
 
+  //Auto calculate the expression
   useEffect(() => {
     if (autoCalculate) {
       setResult(evaluateExpression(expression));
@@ -71,6 +75,7 @@ export default function Calculator() {
     }
   }, [expression, evaluateExpression]);
 
+  //Validate the expressions
   const formatResult = (num) => {
     if (num === null) return "";
     const strNum = num.toString();
@@ -86,6 +91,7 @@ export default function Calculator() {
     return num.toString();
   };
 
+  //Handle key press
   const handleKeyPress = useCallback((event) => {
     const key = event.key;
     if (/^[0-9+\-*/.]$/.test(key)) {
@@ -117,6 +123,7 @@ export default function Calculator() {
     }
   }, [autoCalculate, calculateResult]);
 
+  //Add event listener for key press
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     return () => {
