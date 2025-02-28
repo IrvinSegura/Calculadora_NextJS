@@ -8,7 +8,8 @@ export default function Calculator() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [autoCalculate, setAutoCalculate] = useState(false); // Desactivado por defecto
+  const [autoCalculate, setAutoCalculate] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("calculatorHistory");
@@ -49,13 +50,16 @@ export default function Calculator() {
     const evaluatedResult = evaluateExpression(expression);
     setResult(evaluatedResult);
     if (evaluatedResult !== null) {
-      setHistory((prev) => [...prev, `${expression} = ${evaluatedResult}`].slice(-10));
+      setHistory((prev) => [
+        `${expression} = ${evaluatedResult}`,
+        ...prev
+      ]);
     }
   };
 
   const handleKeyPress = (event) => {
     const key = event.key;
-    if (/^[0-9+\-*/]$/.test(key)) {
+    if (/^[0-9+\-*/.]$/.test(key)) {
       setExpression((prev) => {
         if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(key)) {
           return prev.slice(0, -1) + key;
@@ -89,7 +93,6 @@ export default function Calculator() {
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-gray-900">
       <div className="relative flex flex-col items-center bg-gray-100 p-6 rounded-2xl shadow-xl w-80">
-        {/* Botón de historial */}
         <button
           onClick={() => setShowHistory(!showHistory)}
           className="absolute left-[-40px] top-4 bg-gray-800 text-white p-3 rounded-full shadow-md"
@@ -97,7 +100,6 @@ export default function Calculator() {
           <FaHistory />
         </button>
 
-        {/* Botón de cálculo automático (debajo del historial) */}
         <button
           onClick={() => setAutoCalculate(!autoCalculate)}
           className={`absolute left-[-40px] top-16 p-3 rounded-full shadow-md ${
@@ -107,19 +109,16 @@ export default function Calculator() {
           <FaSyncAlt />
         </button>
 
-        {/* Pantalla de expresión */}
-        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 text-xl font-mono">
+        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 text-xl font-mono truncate">
           {expression || "0"}
         </div>
 
-        {/* Pantalla de resultado */}
-        <div className="w-full text-right text-4xl font-bold mb-4">
+        <div className="w-full text-right text-4xl font-bold mb-4 truncate">
           {result !== null ? result : ""}
         </div>
 
-        {/* Botones */}
         <div className="grid grid-cols-4 gap-3 w-full">
-          {["7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", "0", "C", "+", "="].map(
+          {["7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", "0", ".", "C", "=", "+"].map(
             (char) => (
               <button
                 key={char}
@@ -143,7 +142,6 @@ export default function Calculator() {
           )}
         </div>
 
-        {/* Historial (se muestra solo cuando lo abres) */}
         {showHistory && (
           <motion.div
             initial={{ y: "100%", opacity: 0 }}
@@ -154,24 +152,17 @@ export default function Calculator() {
           >
             <div className="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
               <h2 className="text-lg font-bold text-blue-400">Historial</h2>
-              <button
-                onClick={() => setShowHistory(false)}
-                className="bg-gray-700 p-2 rounded-full text-white text-sm"
-              >
-                ✕
-              </button>
+              <button onClick={() => setShowHistory(false)} className="bg-gray-700 p-2 rounded-full text-white text-sm">✕</button>
             </div>
             <ul className="text-sm text-white mt-2">
-              {history.length > 0 ? (
-                history.map((entry, index) => <li key={index} className="py-1 border-b border-gray-600">{entry}</li>)
-              ) : (
-                <li className="text-gray-400">Vacío</li>
-              )}
+              {(showAllHistory ? history : history.slice(0, 10)).map((entry, index) => (
+                <li key={index} className="py-1 border-b border-gray-600">{entry}</li>
+              ))}
             </ul>
-            <button
-              onClick={clearHistory}
-              className="mt-2 bg-red-600 p-2 rounded-lg text-white text-sm w-full"
-            >
+            {history.length > 10 && !showAllHistory && (
+              <button onClick={() => setShowAllHistory(true)} className="mt-2 bg-gray-600 p-2 rounded-lg text-white text-sm w-full">Ver más</button>
+            )}
+            <button onClick={clearHistory} className="mt-2 bg-red-600 p-2 rounded-lg text-white text-sm w-full">
               <FaTrash className="inline mr-2" /> Borrar Historial
             </button>
           </motion.div>
