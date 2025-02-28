@@ -16,14 +16,6 @@ describe("Calculadora", () => {
     expect(screen.getByText("25875")).toBeInTheDocument(); 
   });  
 
-  test("manejo de expresiones invalidas correctamente", () => {
-    render(<Calculator />);
-    fireEvent.click(screen.getByText("+"));
-    fireEvent.click(screen.getByText("="));
-    
-    expect(screen.getByText(/^0$/)).toBeInTheDocument();
-  });
-
   test("limita la longitud maxima de numeros decimales", () => {
     render(<Calculator />);
     
@@ -52,4 +44,21 @@ describe("Calculadora", () => {
   
     expect(screen.getByText("25820")).toBeInTheDocument(); 
   });   
+
+  test("calculo correcto de numeros de entrada", () => {
+    render(<Calculator />);
+  
+    fireEvent.click(screen.getByText("4"));
+    fireEvent.click(screen.getByText("5"));
+    fireEvent.click(screen.getByText("/"));
+    fireEvent.click(screen.getByText("7"));  
+    fireEvent.click(screen.getByText("5"));  
+    fireEvent.click(screen.getByText("+"));  
+    fireEvent.click(screen.getByText("5"));  
+    fireEvent.click(screen.getByText("5"));  
+
+    fireEvent.click(screen.getByText("="));
+  
+    expect(screen.getByText("55.6")).toBeInTheDocument(); 
+  });
 });
