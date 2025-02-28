@@ -39,13 +39,17 @@ export default function Calculator() {
 
   const handleButtonClick = (value) => {
     setExpression((prev) => {
+      if (!prev && /[+\-*/]/.test(value)) {
+        return prev;
+      }
+
       if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(value)) {
         return prev.slice(0, -1) + value;
       }
 
       const parts = prev.split(/([+\-*/])/);
       const lastNumber = parts[parts.length - 1];
-      
+
       if (!isNaN(value) || value === ".") {
         if (lastNumber.replace(".", "").length >= 15) {
           return prev;
@@ -143,8 +147,10 @@ export default function Calculator() {
           <FaSyncAlt />
         </button>
 
-        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 text-xl font-mono truncate text-black">
-          {expression || "0"}
+        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 font-mono text-black flex flex-col items-end overflow-auto" style={{ minHeight: "3rem", maxHeight: "6rem", whiteSpace: "normal", wordBreak: "break-word" }}>
+          <span className={`transition-all duration-200 ${expression.length > 15 ? "text-sm" : "text-lg"} ${expression.length > 30 ? "text-xs" : ""}`}>
+            {expression || "0"}
+          </span>
         </div>
 
         <div className="w-full text-right font-bold mb-4 p-2 bg-gray-200 rounded-lg overflow-auto break-words text-4xl max-h-20 text-black" style={{ wordWrap: "break-word", minHeight: "3rem" }}>
@@ -192,8 +198,8 @@ export default function Calculator() {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="absolute bottom-0 left-0 w-full bg-gray-800 text-white shadow-xl p-4 rounded-t-2xl max-h-[75%] overflow-y-auto"
           >
-            <div className="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
-              <h2 className="text-lg font-bold text-blue-400">Historial</h2>
+            <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-bold text-blue-400 text-center w-full">Historial</h2>
               <button
                 data-testid="Abrir Historial"
                 onClick={() => setShowHistory(!showHistory)}
@@ -204,15 +210,30 @@ export default function Calculator() {
               </button>
             </div>
 
-            <ul className="text-sm text-white mt-2">
+            <ul className="text-sm text-white space-y-2">
               {(showAllHistory ? history : history.slice(0, 10)).map((entry, index) => (
-                <li key={index} className="py-1 border-b border-gray-600">{entry}</li>
+                <li
+                  key={index}
+                  className="py-2 px-3 bg-gray-700 rounded-lg overflow-hidden whitespace-normal break-words"
+                >
+                  {entry}
+                </li>
               ))}
             </ul>
+
             {history.length > 10 && !showAllHistory && (
-              <button onClick={() => setShowAllHistory(true)} className="mt-2 bg-gray-600 p-2 rounded-lg text-white text-sm w-full">Ver más</button>
+              <button 
+                onClick={() => setShowAllHistory(true)} 
+                className="mt-3 bg-gray-600 p-2 rounded-lg text-white text-sm w-full"
+              >
+                Ver más
+              </button>
             )}
-            <button onClick={clearHistory} className="mt-2 bg-red-600 p-2 rounded-lg text-white text-sm w-full">
+
+            <button 
+              onClick={clearHistory} 
+              className="mt-3 bg-red-600 p-2 rounded-lg text-white text-sm w-full"
+            >
               <FaTrash className="inline mr-2" /> Borrar Historial
             </button>
           </motion.div>
