@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaHistory, FaSyncAlt, FaTrash } from "react-icons/fa";
 
@@ -17,7 +17,7 @@ export default function Calculator() {
       setHistory(JSON.parse(savedHistory));
     }
   }, []);
-
+  
   useEffect(() => {
     localStorage.setItem("calculatorHistory", JSON.stringify(history));
   }, [history]);
@@ -25,7 +25,7 @@ export default function Calculator() {
   const evaluateExpression = (expr) => {
     try {
       if (!/^[0-9+\-*/().\s]+$/.test(expr) || /[+\-*/]$/.test(expr.slice(-1))) return null;
-      return eval(expr);
+      return new Function(`return ${expr}`)(); 
     } catch {
       return null;
     }
@@ -42,7 +42,7 @@ export default function Calculator() {
       if (/[+\-*/]$/.test(prev.slice(-1)) && /[+\-*/]/.test(value)) {
         return prev.slice(0, -1) + value;
       }
-      
+
       const parts = prev.split(/([+\-*/])/);
       const lastNumber = parts[parts.length - 1];
       
@@ -80,7 +80,7 @@ export default function Calculator() {
       return formatted;
     }
     return num.toString();
-  };   
+  };
 
   const handleKeyPress = (event) => {
     const key = event.key;
@@ -98,7 +98,7 @@ export default function Calculator() {
             return prev;
           }
         }
-        
+
         return prev + key;
       });
     } else if (key === "Backspace") {
@@ -127,7 +127,7 @@ export default function Calculator() {
 
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-white">
-      <div className="relative flex flex-col items-center bg-black p-6 rounded-2xl shadow-xl w-96 text-white">
+      <div className="relative flex flex-col items-center bg-black p-6 rounded-2xl shadow-xl w-full max-w-sm text-white">
         <button
           onClick={() => setShowHistory(!showHistory)}
           className="absolute left-[-40px] top-4 bg-gray-800 text-white p-3 rounded-full shadow-md"
@@ -136,6 +136,7 @@ export default function Calculator() {
         </button>
 
         <button
+          data-testid="auto-calculate-button"
           onClick={() => setAutoCalculate(!autoCalculate)}
           className={`absolute left-[-40px] top-16 p-3 rounded-full shadow-md ${
             autoCalculate ? "bg-green-500" : "bg-red-500"
@@ -196,8 +197,16 @@ export default function Calculator() {
           >
             <div className="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
               <h2 className="text-lg font-bold text-blue-400">Historial</h2>
-              <button onClick={() => setShowHistory(false)} className="bg-gray-700 p-2 rounded-full text-white text-sm">✕</button>
+              <button
+                data-testid="Abrir Historial"
+                onClick={() => setShowHistory(!showHistory)}
+                className="absolute left-[-40px] top-4 bg-gray-800 text-white p-3 rounded-full shadow-md"
+                aria-label="Abrir Historial"
+              >
+                <FaHistory />
+              </button>
             </div>
+
             <ul className="text-sm text-white mt-2">
               {(showAllHistory ? history : history.slice(0, 10)).map((entry, index) => (
                 <li key={index} className="py-1 border-b border-gray-600">{entry}</li>
