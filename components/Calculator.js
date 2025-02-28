@@ -54,6 +54,10 @@ export default function Calculator() {
       const parts = prev.split(/([+\-*/])/);
       const lastNumber = parts[parts.length - 1];
 
+      if (value === "." && (lastNumber.includes(".") || lastNumber === "")) {
+        return prev;
+      }
+
       if (!isNaN(value) || value === ".") {
         if (lastNumber.replace(".", "").length >= 15) {
           return prev;
@@ -102,6 +106,10 @@ export default function Calculator() {
 
         const parts = prev.split(/([+\-*/])/);
         const lastNumber = parts[parts.length - 1];
+
+        if (key === "." && (lastNumber.includes(".") || lastNumber === "")) {
+          return prev;
+        }
 
         if (!isNaN(key) || key === ".") {
           if (lastNumber.replace(".", "").length >= 15) {
