@@ -17,8 +17,11 @@
   }
 }
 
-body {
+html, body {
+  overflow: hidden;
+  height: 100%;
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans, Arial, Helvetica, sans-serif);
 }
+

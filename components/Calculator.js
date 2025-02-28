@@ -67,6 +67,21 @@ export default function Calculator() {
     }
   };
 
+  const formatResult = (num) => {
+    if (num === null) return "";
+    const strNum = num.toString();
+    if (strNum.includes(".")) {
+      let [intPart, decPart] = strNum.split(".");
+      decPart = decPart.slice(0, 10);
+      let formatted = intPart + "." + decPart;
+      if (formatted.length > 15) {
+        formatted = formatted.slice(0, 15); 
+      }
+      return formatted;
+    }
+    return num.toString();
+  };   
+
   const handleKeyPress = (event) => {
     const key = event.key;
     if (/^[0-9+\-*/.]$/.test(key)) {
@@ -111,8 +126,8 @@ export default function Calculator() {
   };
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen bg-gray-900">
-      <div className="relative flex flex-col items-center bg-gray-100 p-6 rounded-2xl shadow-xl w-80">
+    <div className="flex items-center justify-center w-screen h-screen bg-white">
+      <div className="relative flex flex-col items-center bg-black p-6 rounded-2xl shadow-xl w-96 text-white">
         <button
           onClick={() => setShowHistory(!showHistory)}
           className="absolute left-[-40px] top-4 bg-gray-800 text-white p-3 rounded-full shadow-md"
@@ -129,37 +144,46 @@ export default function Calculator() {
           <FaSyncAlt />
         </button>
 
-        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 text-xl font-mono truncate">
+        <div className="w-full text-right bg-gray-200 p-3 rounded-lg mb-4 text-xl font-mono truncate text-black">
           {expression || "0"}
         </div>
 
-        <div className="w-full text-right text-4xl font-bold mb-4 truncate">
-          {result !== null ? result : ""}
+        <div className="w-full text-right font-bold mb-4 p-2 bg-gray-200 rounded-lg overflow-auto break-words text-4xl max-h-20 text-black"
+          style={{ wordWrap: "break-word", minHeight: "3rem" }}>
+          {result !== null ? formatResult(result) : ""}
         </div>
 
-        <div className="grid grid-cols-4 gap-3 w-full">
-          {["7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", "0", ".", "C", "=", "+"].map(
-            (char) => (
+        <div className="grid grid-cols-4 gap-2 w-full">
+          <div className="grid grid-cols-3 gap-2 col-span-3">
+            {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", "."].map((char) => (
               <button
                 key={char}
-                onClick={() => {
-                  if (char === "C") {
-                    setExpression("");
-                    setResult(null);
-                  } else if (char === "=") {
-                    if (!autoCalculate) {
-                      calculateResult();
-                    }
-                  } else {
-                    handleButtonClick(char);
-                  }
-                }}
-                className="p-4 bg-blue-500 text-white rounded-lg text-xl hover:bg-blue-700 transition shadow-md"
+                onClick={() => handleButtonClick(char)}
+                className="p-4 bg-blue-500 text-white rounded-md text-xl hover:bg-blue-700 transition shadow-md"
               >
                 {char}
               </button>
-            )
-          )}
+            ))}
+
+            <button
+              onClick={() => setExpression("")}
+              className="p-4 bg-orange-700 text-white rounded-md text-xl hover:bg-orange-900 transition shadow-md"
+            >
+              C
+            </button>
+          </div>
+
+          <div className="grid grid-rows-5 gap-1">
+            {["/", "*", "-", "+", "="].map((char) => (
+              <button
+                key={char}
+                onClick={() => (char === "=" ? calculateResult() : handleButtonClick(char))}
+                className="p-3 bg-orange-500 text-white rounded-md text-lg hover:bg-orange-700 transition shadow-md"
+              >
+                {char}
+              </button>
+            ))}
+          </div>
         </div>
 
         {showHistory && (
